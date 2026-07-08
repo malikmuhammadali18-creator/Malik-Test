@@ -1,0 +1,224 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  Admin
+  SchoolAdmin
+  Teacher
+  Student
+  Guest
+}
+
+enum ResourceType {
+  LessonPlan
+  Worksheet
+  Quiz
+  Assessment
+  Presentation
+  ReadingMaterial
+  Homework
+  Activity
+  Image
+  Video
+  PDF
+  WordDocument
+}
+
+enum ResourceStatus {
+  Draft
+  PendingReview
+  Approved
+  Rejected
+  Archived
+}
+
+enum Visibility {
+  Public
+  SchoolOnly
+  Private
+}
+
+enum UserStatus {
+  Active
+  Inactive
+  Suspended
+}
+
+model School {
+  id        String   @id @default(uuid())
+  name      String
+  logo      String?
+  address   String?
+  city      String?
+  country   String?
+  status    String   @default("Active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  users       User[]
+  resources   Resource[]
+  collections Collection[]
+
+  @@index([name])
+}
+
+model User {
+  id           String     @id @default(uuid())
+  firstName    String
+  lastName     String
+  email        String     @unique
+  passwordHash String
+  role         Role       @default(Student)
+  avatar       String?
+  status       UserStatus @default(Active)
+  lastLogin    DateTime?
+  schoolId     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+
+  school             School?        @relation(fields: [schoolId], references: [id])
+  resources          Resource[]     @relation("UploadedResources")
+  collections        Collection[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  favoriteResources  Resource[]     @relation("FavoriteResources")
+
+  @@index([email])
+  @@index([schoolId])
+}
+
+model Category {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  resources Resource[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Subject {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  resources Resource[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Grade {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  resources Resource[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Tag {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  resources Resource[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model File {
+  id           String    @id @default(uuid())
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  storageKey   String    @unique
+  resource     Resource?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Resource {
+  id           String         @id @default(uuid())
+  title        String
+  description  String?
+  resourceType ResourceType
+  visibility   Visibility     @default(SchoolOnly)
+  status       ResourceStatus @default(PendingReview)
+  downloads    Int            @default(0)
+  views        Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+
+  subjectId  String?
+  gradeId    String?
+  categoryId String?
+  uploadedBy String
+  schoolId   String?
+  fileId     String? @unique
+
+  subject    Subject?  @relation(fields: [subjectId], references: [id])
+  grade      Grade?    @relation(fields: [gradeId], references: [id])
+  category   Category? @relation(fields: [categoryId], references: [id])
+  uploader   User      @relation("UploadedResources", fields: [uploadedBy], references: [id])
+  school     School?   @relation(fields: [schoolId], references: [id])
+  file       File?     @relation(fields: [fileId], references: [id])
+  tags       Tag[]
+  collections Collection[]
+  favoritedBy User[]   @relation("FavoriteResources")
+
+  @@index([title])
+  @@index([subjectId])
+  @@index([gradeId])
+  @@index([categoryId])
+  @@index([uploadedBy])
+  @@index([schoolId])
+}
+
+model Collection {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  ownerId     String
+  schoolId    String?
+  
+  owner       User       @relation(fields: [ownerId], references: [id])
+  school      School?    @relation(fields: [schoolId], references: [id])
+  resources   Resource[]
+
+  @@index([ownerId])
+  @@index([schoolId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  userId    String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  entityId  String?
+  entityType String?
+  details   String?
+  userId    String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType, entityId])
+}
