@@ -2,6 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, Resource } from '@prisma/client';
 
+// Resource<->Tag is an explicit join table (ResourceTag) in the database;
+// flatten it back into a plain `tags` array to keep the API response shape unchanged.
+function flattenTags<T extends { resourceTags: { tag: unknown }[] }>(resource: T) {
+  const { resourceTags, ...rest } = resource;
+  return { ...rest, tags: resourceTags.map((rt) => rt.tag) };
+}
+
 @Injectable()
 export class ResourcesService {
   constructor(private prisma: PrismaService) {}
@@ -18,7 +25,7 @@ export class ResourcesService {
     orderBy?: Prisma.ResourceOrderByWithRelationInput;
   }): Promise<Resource[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.resource.findMany({
+    const resources = await this.prisma.resource.findMany({
       skip,
       take,
       cursor,
@@ -30,9 +37,10 @@ export class ResourcesService {
         subject: true,
         grade: true,
         category: true,
-        tags: true,
+        resourceTags: { include: { tag: true } },
       },
     });
+    return resources.map(flattenTags);
   }
 
   async findOne(id: string): Promise<Resource> {
@@ -44,7 +52,7 @@ export class ResourcesService {
         subject: true,
         grade: true,
         category: true,
-        tags: true,
+        resourceTags: { include: { tag: true } },
       },
     });
     if (!resource || resource.deletedAt) {
@@ -55,7 +63,7 @@ export class ResourcesService {
       where: { id },
       data: { views: { increment: 1 } }
     });
-    return resource;
+    return flattenTags(resource);
   }
 
   async update(id: string, data: Prisma.ResourceUpdateInput): Promise<Resource> {

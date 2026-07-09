@@ -54,7 +54,7 @@ export class SearchService {
     if (resourceType) where.resourceType = resourceType;
 
     if (tags && tags.length > 0) {
-      where.tags = { some: { name: { in: tags } } };
+      where.resourceTags = { some: { tag: { name: { in: tags } } } };
     }
 
     if (startDate || endDate) {
@@ -67,7 +67,7 @@ export class SearchService {
       [sortBy]: sortOrder,
     };
 
-    const [data, total] = await Promise.all([
+    const [rawData, total] = await Promise.all([
       this.prisma.resource.findMany({
         where,
         skip,
@@ -77,12 +77,17 @@ export class SearchService {
           subject: true,
           grade: true,
           category: true,
-          tags: true,
+          resourceTags: { include: { tag: true } },
           uploader: { select: { id: true, firstName: true, lastName: true } },
         },
       }),
       this.prisma.resource.count({ where }),
     ]);
+
+    const data = rawData.map(({ resourceTags, ...resource }) => ({
+      ...resource,
+      tags: resourceTags.map((rt) => rt.tag),
+    }));
 
     return {
       data,
