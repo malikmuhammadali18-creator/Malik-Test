@@ -1,25 +1,28 @@
+import 'dotenv/config';
 import { PrismaClient, Role, UserStatus } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient({
-  url: process.env.DATABASE_URL,
-} as any);
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+});
 
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // Create a school
-  const school = await prisma.school.upsert({
-    where: { id: 'seed-school-1' },
-    update: {},
-    create: {
-      id: 'seed-school-1',
-      name: 'Greenwood Academy',
-      city: 'New York',
-      country: 'United States',
-      status: 'Active',
-    },
-  });
+  // Create a school (School.name has no unique constraint, so upsert-by-id
+  // isn't usable here; find-or-create by name instead)
+  let school = await prisma.school.findFirst({ where: { name: 'Greenwood Academy' } });
+  if (!school) {
+    school = await prisma.school.create({
+      data: {
+        name: 'Greenwood Academy',
+        city: 'New York',
+        country: 'United States',
+        status: 'Active',
+      },
+    });
+  }
 
   // Create admin user
   const adminHash = await bcrypt.hash('Admin@1234', 10);

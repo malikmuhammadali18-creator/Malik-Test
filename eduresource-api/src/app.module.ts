@@ -12,6 +12,7 @@ import { SearchModule } from './search/search.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { TaxonomyModule } from './taxonomy/taxonomy.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
     NotificationsModule,
     ReportsModule,
     AuditLogsModule,
+    TaxonomyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

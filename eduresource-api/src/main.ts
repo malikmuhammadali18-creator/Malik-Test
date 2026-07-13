@@ -48,6 +48,7 @@ async function bootstrap() {
     .addTag('notifications', 'User notifications')
     .addTag('reports', 'Analytics and reports')
     .addTag('audit-logs', 'Audit trail')
+    .addTag('taxonomy', 'Subjects, grades, categories, and tags')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

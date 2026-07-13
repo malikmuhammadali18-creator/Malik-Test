@@ -33,9 +33,10 @@ export class UsersService {
     });
   }
 
-  async findById(id: string): Promise<User> {
+  async findById(id: string): Promise<Omit<User, 'passwordHash'>> {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      omit: { passwordHash: true },
     });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -43,10 +44,11 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<Omit<User, 'passwordHash'>> {
     return this.prisma.user.update({
       where: { id },
       data,
+      omit: { passwordHash: true },
     });
   }
 }

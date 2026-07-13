@@ -10,15 +10,15 @@ import { Role } from '@prisma/client';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get('me')
+  async getProfile(@Req() req: any) {
+    return this.usersService.findById(req.user.sub);
+  }
+
   @Roles(Role.Admin, Role.SchoolAdmin)
   @Get(':id')
   async getUser(@Param('id') id: string) {
     return this.usersService.findById(id);
-  }
-
-  @Get('me')
-  async getProfile(@Req() req: any) {
-    return this.usersService.findById(req.user.sub);
   }
 
   @Put(':id')
