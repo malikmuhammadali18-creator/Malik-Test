@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Put, UseGuards, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UseGuards, Req, UsePipes, ValidationPipe } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { BroadcastSmsDto } from './dto/broadcast-sms.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('notifications')
@@ -10,6 +11,12 @@ export class NotificationsController {
   @Get()
   findAll(@Req() req: any) {
     return this.notificationsService.findAllForUser(req.user.sub);
+  }
+
+  @Post('broadcast')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  broadcastSms(@Body() dto: BroadcastSmsDto) {
+    return this.notificationsService.broadcastSms(dto.numbers, dto.message);
   }
 
   @Put(':id/read')

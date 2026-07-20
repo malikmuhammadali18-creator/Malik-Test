@@ -220,7 +220,7 @@ The seed script creates the following demo accounts:
 
 | Role | Email | Password |
 |---|---|---|
-| Admin | `admin@eduresource.com` | `Admin@1234` |
+| Admin | `malikmuhammadali18@gmail.com` | `laptophp99` |
 | School Admin | `schooladmin@greenwood.edu` | `SchoolAdmin@1234` |
 | Teacher | `teacher@greenwood.edu` | `Teacher@1234` |
 

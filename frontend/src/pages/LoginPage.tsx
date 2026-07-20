@@ -27,7 +27,9 @@ export function LoginPage() {
 
   return (
     <div className="auth-shell">
-      <h1>Log in</h1>
+      <h1>Bait ul Islam School Portal</h1>
+      <p className="auth-subtitle">Sign in to manage syllabus, worksheets, and parent communications.</p>
+      <p className="auth-urdu">ایک سکول سب کی طرح مگر سب سے جُدا۔</p>
       {error && <div className="error-banner">{error}</div>}
       <form onSubmit={handleSubmit} className="card">
         <div className="form-field">

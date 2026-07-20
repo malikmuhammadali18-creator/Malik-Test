@@ -12,27 +12,49 @@ async function main() {
 
   // Create a school (School.name has no unique constraint, so upsert-by-id
   // isn't usable here; find-or-create by name instead)
-  let school = await prisma.school.findFirst({ where: { name: 'Greenwood Academy' } });
+  let school = await prisma.school.findFirst({ where: { name: 'Bait ul islam school Barki Campus' } });
   if (!school) {
+    school = await prisma.school.findFirst({ where: { name: 'Greenwood Academy' } });
+  }
+
+  if (school) {
+    school = await prisma.school.update({
+      where: { id: school.id },
+      data: {
+        name: 'Bait ul islam school Barki Campus',
+        address: 'Barki Lahore Cantt',
+        city: 'Lahore',
+        country: 'Pakistan',
+        phone: '03364400783',
+        email: 'baitulislamschoolbarki@gmail.com',
+        principal: 'Muhammad Ali',
+        status: 'Active',
+      },
+    });
+  } else {
     school = await prisma.school.create({
       data: {
-        name: 'Greenwood Academy',
-        city: 'New York',
-        country: 'United States',
+        name: 'Bait ul islam school Barki Campus',
+        address: 'Barki Lahore Cantt',
+        city: 'Lahore',
+        country: 'Pakistan',
+        phone: '03364400783',
+        email: 'baitulislamschoolbarki@gmail.com',
+        principal: 'Muhammad Ali',
         status: 'Active',
       },
     });
   }
 
   // Create admin user
-  const adminHash = await bcrypt.hash('Admin@1234', 10);
+  const adminHash = await bcrypt.hash('laptophp99', 10);
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@eduresource.com' },
+    where: { email: 'malikmuhammadali18@gmail.com' },
     update: {},
     create: {
       firstName: 'Super',
       lastName: 'Admin',
-      email: 'admin@eduresource.com',
+      email: 'malikmuhammadali18@gmail.com',
       passwordHash: adminHash,
       role: Role.Admin,
       status: UserStatus.Active,
@@ -91,23 +113,29 @@ async function main() {
   });
 
   // Create grades
-  const grade1 = await prisma.grade.upsert({
-    where: { name: 'Grade 1' },
-    update: {},
-    create: { name: 'Grade 1' },
-  });
+  const gradeNames = [
+    'Play Group',
+    'Nursery',
+    'Prep',
+    'Two',
+    'Three',
+    'Four',
+    '6th',
+    '7th',
+    'Pre 9th',
+    '9th',
+    'Grade 1',
+    'Grade 5',
+    'Grade 10',
+  ];
 
-  const grade5 = await prisma.grade.upsert({
-    where: { name: 'Grade 5' },
-    update: {},
-    create: { name: 'Grade 5' },
-  });
-
-  const grade10 = await prisma.grade.upsert({
-    where: { name: 'Grade 10' },
-    update: {},
-    create: { name: 'Grade 10' },
-  });
+  for (const name of gradeNames) {
+    await prisma.grade.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
 
   // Create categories
   const lessonCategory = await prisma.category.upsert({
@@ -137,7 +165,7 @@ async function main() {
 
   console.log('✅ Database seeded successfully!');
   console.log('\n📋 Seed Credentials:');
-  console.log('  Admin:        admin@eduresource.com / Admin@1234');
+  console.log('  Admin:        malikmuhammadali18@gmail.com / laptophp99');
   console.log('  School Admin: schooladmin@greenwood.edu / SchoolAdmin@1234');
   console.log('  Teacher:      teacher@greenwood.edu / Teacher@1234');
 }

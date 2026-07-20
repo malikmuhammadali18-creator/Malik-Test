@@ -6,10 +6,21 @@ import type { Category, Grade, Resource, Subject } from '../api/types';
 import { RESOURCE_TYPES } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
+import logoUrl from '../assets/bait-ul-islam-logo.svg';
 
 const CAN_CREATE_ROLES = ['Admin', 'SchoolAdmin', 'Teacher'];
 
-export function ResourcesPage() {
+interface ResourcesPageProps {
+  defaultType?: string;
+  pageTitle?: string;
+  pageDescription?: string;
+}
+
+export function ResourcesPage({
+  defaultType = '',
+  pageTitle = 'Class resources',
+  pageDescription = 'Browse your child’s syllabus, worksheets, and classroom materials in one secure place.',
+}: ResourcesPageProps) {
   const { user } = useAuth();
   const [resources, setResources] = useState<Resource[]>([]);
   const [total, setTotal] = useState(0);
@@ -21,11 +32,27 @@ export function ResourcesPage() {
   const [subjectId, setSubjectId] = useState('');
   const [gradeId, setGradeId] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [resourceType, setResourceType] = useState('');
+  const [resourceType, setResourceType] = useState(defaultType);
   const [sortBy, setSortBy] = useState<'createdAt' | 'downloads' | 'views' | 'title'>('createdAt');
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const greeting = user
+    ? user.role === 'Teacher'
+      ? `Welcome, ${user.firstName}.`
+      : user.role === 'SchoolAdmin'
+      ? 'Welcome, School Administration.'
+      : user.role === 'Admin'
+      ? 'Welcome, Admin.'
+      : 'Welcome to Bait ul Islam School Portal.'
+    : 'Welcome to Bait ul Islam School Portal.';
+
+  const subGreeting = user
+    ? user.role === 'Teacher'
+      ? 'Share lesson plans, worksheets, and syllabus resources with parents and students.'
+      : 'Manage school curriculum resources for teachers and parents.'
+    : 'Access classroom resources, syllabus documents, and worksheets.';
 
   useEffect(() => {
     Promise.all([listSubjects(), listGrades(), listCategories()])
@@ -62,12 +89,73 @@ export function ResourcesPage() {
   return (
     <div>
       <div className="section-header">
-        <h1>Resources</h1>
+        <div>
+          <p className="section-kicker">Parent & Teacher Portal</p>
+          <h1>School dashboard</h1>
+          <p className="section-description">
+            A single place for principals, teachers, and parents to access syllabus and worksheet materials.
+          </p>
+          <p className="hero-quote">ایک سکول سب کی طرح مگر سب سے جُدا۔</p>
+          <div className="resource-welcome">
+            <div>
+              <h2>{greeting}</h2>
+              <p>{subGreeting}</p>
+            </div>
+          </div>
+        </div>
         {user && CAN_CREATE_ROLES.includes(user.role) && (
           <Link to="/resources/new" className="btn btn-sm">
             + New resource
           </Link>
         )}
+      </div>
+
+      <div className="dashboard-hero card">
+        <div className="dashboard-hero__brand">
+          <img className="dashboard-hero__logo" src={logoUrl} alt="Bait ul Islam School logo" />
+          <div>
+            <p className="section-kicker">Bait ul Islam School</p>
+            <h2>Welcome to your curriculum hub</h2>
+          </div>
+        </div>
+        <p>
+          Keep syllabus materials, worksheets, and class resources organized for teachers,
+          students, and parents. This dashboard helps you publish, review, and share school
+          documents with one click.
+        </p>
+        <div className="stat-grid">
+          <div className="stat-tile">
+            <div className="stat-tile__value">{total}</div>
+            <div className="stat-tile__label">Total resources</div>
+          </div>
+          <div className="stat-tile">
+            <div className="stat-tile__value">{resources.filter((r) => r.resourceType === 'PDF').length}</div>
+            <div className="stat-tile__label">Syllabus documents</div>
+          </div>
+          <div className="stat-tile">
+            <div className="stat-tile__value">{resources.filter((r) => r.resourceType === 'Worksheet').length}</div>
+            <div className="stat-tile__label">Worksheets</div>
+          </div>
+          <div className="stat-tile">
+            <div className="stat-tile__value">{grades.length}</div>
+            <div className="stat-tile__label">Supported grades</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="dashboard-cards">
+        <Link to="/syllabus" className="dashboard-card card">
+          <h3>Syllabus library</h3>
+          <p>Quick access to syllabus documents for each grade and subject.</p>
+        </Link>
+        <Link to="/worksheets" className="dashboard-card card">
+          <h3>Worksheets</h3>
+          <p>Download student worksheets and classroom practice material.</p>
+        </Link>
+        <Link to="/resources/new" className="dashboard-card card">
+          <h3>Upload resources</h3>
+          <p>Create and share new syllabus, worksheet, or class materials.</p>
+        </Link>
       </div>
 
       <div className="filters-bar">

@@ -5,6 +5,8 @@ import { Layout } from './components/Layout';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ResourcesPage } from './pages/ResourcesPage';
+import { SyllabusPage } from './pages/SyllabusPage';
+import { WorksheetPage } from './pages/WorksheetPage';
 import { ResourceDetailPage } from './pages/ResourceDetailPage';
 import { ResourceFormPage } from './pages/ResourceFormPage';
 import { SchoolsPage } from './pages/SchoolsPage';
@@ -28,6 +30,8 @@ export function App() {
               <Route path="/resources/new" element={<ResourceFormPage />} />
               <Route path="/resources/:id" element={<ResourceDetailPage />} />
               <Route path="/resources/:id/edit" element={<ResourceFormPage />} />
+              <Route path="/syllabus" element={<SyllabusPage />} />
+              <Route path="/worksheets" element={<WorksheetPage />} />
               <Route path="/schools" element={<SchoolsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/notifications" element={<NotificationsPage />} />

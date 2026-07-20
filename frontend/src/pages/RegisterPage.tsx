@@ -29,7 +29,8 @@ export function RegisterPage() {
 
   return (
     <div className="auth-shell">
-      <h1>Create an account</h1>
+      <h1>Register for the school portal</h1>
+      <p className="auth-subtitle">Register to access class resources, syllabi, and student support materials.</p>
       {error && <div className="error-banner">{error}</div>}
       <form onSubmit={handleSubmit} className="card">
         <div className="form-row">

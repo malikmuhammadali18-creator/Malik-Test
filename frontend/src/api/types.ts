@@ -58,6 +58,9 @@ export interface School {
   address?: string | null;
   city?: string | null;
   country?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  principal?: string | null;
   status: string;
   createdAt: string;
 }

@@ -14,6 +14,9 @@ export interface SchoolInput {
   address?: string;
   city?: string;
   country?: string;
+  phone?: string;
+  email?: string;
+  principal?: string;
 }
 
 export function createSchool(input: SchoolInput) {

@@ -4,7 +4,15 @@ import type { School } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 
-const emptyForm = { name: '', address: '', city: '', country: '' };
+const emptyForm = {
+  name: '',
+  address: '',
+  city: '',
+  country: '',
+  phone: '',
+  email: '',
+  principal: '',
+};
 
 export function SchoolsPage() {
   const { user } = useAuth();
@@ -54,6 +62,9 @@ export function SchoolsPage() {
       address: school.address ?? '',
       city: school.city ?? '',
       country: school.country ?? '',
+      phone: school.phone ?? '',
+      email: school.email ?? '',
+      principal: school.principal ?? '',
     });
   }
 
@@ -97,6 +108,13 @@ export function SchoolsPage() {
               />
             </div>
             <div className="form-field">
+              <label>Address</label>
+              <input
+                value={createForm.address}
+                onChange={(e) => setCreateForm({ ...createForm, address: e.target.value })}
+              />
+            </div>
+            <div className="form-field">
               <label>City</label>
               <input
                 value={createForm.city}
@@ -108,6 +126,27 @@ export function SchoolsPage() {
               <input
                 value={createForm.country}
                 onChange={(e) => setCreateForm({ ...createForm, country: e.target.value })}
+              />
+            </div>
+            <div className="form-field">
+              <label>Phone</label>
+              <input
+                value={createForm.phone}
+                onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
+              />
+            </div>
+            <div className="form-field">
+              <label>Email</label>
+              <input
+                value={createForm.email}
+                onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+              />
+            </div>
+            <div className="form-field">
+              <label>Principal</label>
+              <input
+                value={createForm.principal}
+                onChange={(e) => setCreateForm({ ...createForm, principal: e.target.value })}
               />
             </div>
           </div>
@@ -135,6 +174,13 @@ export function SchoolsPage() {
                   />
                 </div>
                 <div className="form-field">
+                  <label>Address</label>
+                  <input
+                    value={editForm.address}
+                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                  />
+                </div>
+                <div className="form-field">
                   <label>City</label>
                   <input
                     value={editForm.city}
@@ -146,6 +192,27 @@ export function SchoolsPage() {
                   <input
                     value={editForm.country}
                     onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                  />
+                </div>
+                <div className="form-field">
+                  <label>Phone</label>
+                  <input
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  />
+                </div>
+                <div className="form-field">
+                  <label>Email</label>
+                  <input
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  />
+                </div>
+                <div className="form-field">
+                  <label>Principal</label>
+                  <input
+                    value={editForm.principal}
+                    onChange={(e) => setEditForm({ ...editForm, principal: e.target.value })}
                   />
                 </div>
               </div>
@@ -167,8 +234,11 @@ export function SchoolsPage() {
               <div>
                 <h3>{school.name}</h3>
                 <p className="resource-card__meta">
-                  {[school.city, school.country].filter(Boolean).join(', ') || 'No location set'}
+                  {[school.address, school.city, school.country].filter(Boolean).join(', ') || 'No location set'}
                 </p>
+                {school.phone && <p className="resource-card__meta">Phone: {school.phone}</p>}
+                {school.email && <p className="resource-card__meta">Email: {school.email}</p>}
+                {school.principal && <p className="resource-card__meta">Principal: {school.principal}</p>}
               </div>
               <div className="btn-row">
                 {canEdit && (
