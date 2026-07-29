@@ -1,0 +1,20 @@
+# Local Claude Code config/session state
+.claude/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Node projects (safety net for any nested project without its own .gitignore)
+node_modules/
+dist/
+*.log
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example

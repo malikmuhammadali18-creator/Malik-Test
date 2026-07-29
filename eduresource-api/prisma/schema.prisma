@@ -1,0 +1,292 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  Admin
+  SchoolAdmin
+  Teacher
+  Student
+  Guest
+
+  @@map("role")
+}
+
+enum ResourceType {
+  LessonPlan
+  Worksheet
+  Quiz
+  Assessment
+  Presentation
+  ReadingMaterial
+  Homework
+  Activity
+  Image
+  Video
+  PDF
+  WordDocument
+
+  @@map("resource_type")
+}
+
+enum ResourceStatus {
+  Draft
+  PendingReview
+  Approved
+  Rejected
+  Archived
+
+  @@map("resource_status")
+}
+
+enum Visibility {
+  Public
+  SchoolOnly
+  Private
+
+  @@map("visibility")
+}
+
+enum UserStatus {
+  Active
+  Inactive
+  Suspended
+
+  @@map("user_status")
+}
+
+model School {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  logo      String?
+  address   String?
+  city      String?
+  country   String?
+  phone     String?
+  email     String?
+  principal String?
+  status    String    @default("Active")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  users       User[]
+  resources   Resource[]
+  collections Collection[]
+
+  @@index([name], map: "idx_schools_name")
+  @@map("schools")
+}
+
+model User {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName    String     @map("first_name")
+  lastName     String     @map("last_name")
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  role         Role       @default(Student)
+  avatar       String?
+  status       UserStatus @default(Active)
+  lastLogin    DateTime?  @map("last_login") @db.Timestamptz(6)
+  schoolId     String?    @map("school_id") @db.Uuid
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz(6)
+
+  school            School?                @relation(fields: [schoolId], references: [id])
+  resources         Resource[]             @relation("UploadedResources")
+  collections       Collection[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  favoriteResources UserFavoriteResource[]
+
+  @@index([email], map: "idx_users_email")
+  @@index([schoolId], map: "idx_users_school_id")
+  @@map("users")
+}
+
+model Category {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String     @unique
+  resources Resource[]
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("categories")
+}
+
+model Subject {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String     @unique
+  resources Resource[]
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("subjects")
+}
+
+model Grade {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String     @unique
+  resources Resource[]
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("grades")
+}
+
+model Tag {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String        @unique
+  resourceTags ResourceTag[]
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("tags")
+}
+
+model File {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  originalName String    @map("original_name")
+  mimeType     String    @map("mime_type")
+  size         Int
+  url          String
+  storageKey   String    @unique @map("storage_key")
+  resource     Resource?
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("files")
+}
+
+model Resource {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title        String
+  description  String?
+  resourceType ResourceType   @map("resource_type")
+  visibility   Visibility     @default(SchoolOnly)
+  status       ResourceStatus @default(PendingReview)
+  downloads    Int            @default(0)
+  views        Int            @default(0)
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt    DateTime?      @map("deleted_at") @db.Timestamptz(6)
+
+  subjectId  String? @map("subject_id") @db.Uuid
+  gradeId    String? @map("grade_id") @db.Uuid
+  categoryId String? @map("category_id") @db.Uuid
+  uploadedBy String  @map("uploaded_by") @db.Uuid
+  schoolId   String? @map("school_id") @db.Uuid
+  fileId     String? @unique @map("file_id") @db.Uuid
+
+  subject             Subject?               @relation(fields: [subjectId], references: [id])
+  grade                Grade?                @relation(fields: [gradeId], references: [id])
+  category             Category?             @relation(fields: [categoryId], references: [id])
+  uploader             User                  @relation("UploadedResources", fields: [uploadedBy], references: [id])
+  school               School?               @relation(fields: [schoolId], references: [id])
+  file                 File?                 @relation(fields: [fileId], references: [id])
+  resourceTags         ResourceTag[]
+  collectionResources  CollectionResource[]
+  favoritedBy          UserFavoriteResource[]
+
+  @@index([title], map: "idx_resources_title")
+  @@index([subjectId], map: "idx_resources_subject_id")
+  @@index([gradeId], map: "idx_resources_grade_id")
+  @@index([categoryId], map: "idx_resources_category_id")
+  @@index([uploadedBy], map: "idx_resources_uploaded_by")
+  @@index([schoolId], map: "idx_resources_school_id")
+  @@map("resources")
+}
+
+/// Explicit join table for the Resource <-> Tag many-to-many relation.
+model ResourceTag {
+  resourceId String @map("resource_id") @db.Uuid
+  tagId      String @map("tag_id") @db.Uuid
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, tagId])
+  @@index([tagId], map: "idx_resource_tags_tag_id")
+  @@map("resource_tags")
+}
+
+model Collection {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  ownerId  String  @map("owner_id") @db.Uuid
+  schoolId String? @map("school_id") @db.Uuid
+
+  owner               User                 @relation(fields: [ownerId], references: [id])
+  school               School?             @relation(fields: [schoolId], references: [id])
+  collectionResources  CollectionResource[]
+
+  @@index([ownerId], map: "idx_collections_owner_id")
+  @@index([schoolId], map: "idx_collections_school_id")
+  @@map("collections")
+}
+
+/// Explicit join table for the Collection <-> Resource many-to-many relation.
+model CollectionResource {
+  collectionId String @map("collection_id") @db.Uuid
+  resourceId   String @map("resource_id") @db.Uuid
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  resource   Resource   @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, resourceId])
+  @@index([resourceId], map: "idx_collection_resources_resource_id")
+  @@map("collection_resources")
+}
+
+/// Explicit join table for the User <-> Resource "favorites" many-to-many relation.
+model UserFavoriteResource {
+  userId     String @map("user_id") @db.Uuid
+  resourceId String @map("resource_id") @db.Uuid
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, resourceId])
+  @@index([resourceId], map: "idx_user_favorite_resources_resource_id")
+  @@map("user_favorite_resources")
+}
+
+model Notification {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "idx_notifications_user_id")
+  @@map("notifications")
+}
+
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  action     String
+  entityId   String?  @map("entity_id")
+  entityType String?  @map("entity_type")
+  details    String?
+  userId     String?  @map("user_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "idx_audit_logs_user_id")
+  @@index([action], map: "idx_audit_logs_action")
+  @@index([entityType, entityId], map: "idx_audit_logs_entity")
+  @@map("audit_logs")
+}
