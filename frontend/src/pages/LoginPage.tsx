@@ -15,11 +15,20 @@ export function LoginPage() {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
+
     try {
-      await login(email, password);
+      await Promise.race([
+        login(email, password),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Login timed out')), 10000)),
+      ]);
       navigate('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Login failed');
+      const message = err instanceof Error && err.message === 'Login timed out'
+        ? 'Login is taking too long. Please check the server connection and try again.'
+        : err instanceof ApiError
+          ? err.message
+          : 'Login failed';
+      setError(message);
     } finally {
       setSubmitting(false);
     }

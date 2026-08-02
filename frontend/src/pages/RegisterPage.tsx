@@ -17,11 +17,20 @@ export function RegisterPage() {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
+
     try {
-      await register(firstName, lastName, email, password);
+      await Promise.race([
+        register(firstName, lastName, email, password),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Registration timed out')), 10000)),
+      ]);
       navigate('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Registration failed');
+      const message = err instanceof Error && err.message === 'Registration timed out'
+        ? 'Registration is taking too long. Please check the server connection and try again.'
+        : err instanceof ApiError
+          ? err.message
+          : 'Registration failed';
+      setError(message);
     } finally {
       setSubmitting(false);
     }
