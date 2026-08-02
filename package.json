@@ -2,7 +2,6 @@
   "name": "malik-test-portal",
   "version": "0.0.1",
   "private": true,
-  "type": "module",
   "scripts": {
     "postinstall": "prisma generate --schema=eduresource-api/prisma/schema.prisma",
     "build": "vite build"
