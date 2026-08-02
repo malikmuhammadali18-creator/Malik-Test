@@ -1,4 +1,4 @@
-const API_URL = (import.meta.env.VITE_API_URL || '/api/v1').replace(/\/$/, '');
+const API_URL = (import.meta.env.VITE_API_URL || window.location.origin + '/api/v1').replace(/\/$/, '');
 
 export class ApiError extends Error {
   errors: string[];
