@@ -24,6 +24,5 @@ export default async function handler(req: unknown, res: unknown) {
     handlerPromise = createHandler();
   }
   const serverlessHandler = await handlerPromise;
-  // @ts-expect-error serverless-http's request/response types are intentionally loose (Node req/res)
   return serverlessHandler(req, res);
 }
