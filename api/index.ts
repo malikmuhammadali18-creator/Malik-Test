@@ -7,7 +7,7 @@ import { AppModule } from '../eduresource-api/src/app.module';
 import { configureApp } from '../eduresource-api/src/bootstrap';
 
 const expressApp = express();
-let cachedHandler: ReturnType<typeof serverlessHttp> | null = null;
+let cachedHandler: any = null;
 
 async function createHandler() {
   if (cachedHandler) return cachedHandler;
@@ -20,11 +20,13 @@ async function createHandler() {
   await configureApp(app);
   await app.init();
 
-  cachedHandler = serverlessHttp(expressApp);
+  cachedHandler = serverlessHttp(expressApp, {
+    binary: ['application/octet-stream', 'image/*', 'font/*'],
+  });
   return cachedHandler;
 }
 
-export default async function handler(req: unknown, res: unknown) {
+export default async function handler(req: any, res: any) {
   const serverlessHandler = await createHandler();
   return serverlessHandler(req, res);
 }
