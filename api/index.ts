@@ -7,22 +7,24 @@ import { AppModule } from '../eduresource-api/src/app.module';
 import { configureApp } from '../eduresource-api/src/bootstrap';
 
 const expressApp = express();
-let handlerPromise: Promise<ReturnType<typeof serverlessHttp>> | null = null;
+let cachedHandler: ReturnType<typeof serverlessHttp> | null = null;
 
 async function createHandler() {
+  if (cachedHandler) return cachedHandler;
+
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
     new ExpressAdapter(expressApp),
   );
+
   await configureApp(app);
   await app.init();
-  return serverlessHttp(expressApp);
+
+  cachedHandler = serverlessHttp(expressApp);
+  return cachedHandler;
 }
 
 export default async function handler(req: unknown, res: unknown) {
-  if (!handlerPromise) {
-    handlerPromise = createHandler();
-  }
-  const serverlessHandler = await handlerPromise;
+  const serverlessHandler = await createHandler();
   return serverlessHandler(req, res);
 }
