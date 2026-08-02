@@ -23,7 +23,12 @@ export class StorageService {
       process.env.S3_SECRET === 'default-secret';
 
     if (this.useLocalStorage) {
-      fs.mkdirSync(this.uploadsPath, { recursive: true });
+      try {
+        fs.mkdirSync(this.uploadsPath, { recursive: true });
+      } catch {
+        // Read-only filesystem (e.g. serverless) - local storage uploads will fail,
+        // but the app should still boot and serve every other route.
+      }
       return;
     }
 
